@@ -113,6 +113,9 @@ input[type=file] { font-size: .88rem; max-width: 100%; }
   background-image: linear-gradient(var(--red), var(--red)); background-size: 100% 3px; background-repeat: no-repeat; }
 .auth-msg { margin: 0; font-size: .9rem; color: var(--good); min-height: 1.2em; }
 .auth-msg.bad { color: var(--again); }
+.auth-note { border-top: 1px solid var(--line-soft); padding-top: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.auth-note p { margin: 0; font-size: .86rem; color: var(--muted); line-height: 1.6; }
+.auth-note strong { color: var(--text); }
 
 /* ---------- 首页 ---------- */
 .home-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
