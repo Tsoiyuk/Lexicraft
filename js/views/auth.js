@@ -20,13 +20,19 @@ export function renderAuth(root, { joining = false } = {}) {
   const signUp = h('button', { class: 'btn ghost', type: 'button' }, T('注册新账号', 'Create account'));
   const magic = h('button', { class: 'link', type: 'button' }, T('用邮件里的链接登录', 'Email me a sign-in link'));
   const forgot = h('button', { class: 'link', type: 'button' }, T('忘记密码', 'Forgot password'));
+  const setPw = h('button', { class: 'btn ghost small', type: 'button' }, T('通过邮件设置密码', 'Set a password by email'));
+  const note = h('div', { class: 'auth-note' },
+    h('p', {}, h('strong', {}, T('已有「抱佛脚」账号？', 'Already use 抱佛脚 (Save Deadlines)?')), ' ',
+      T('两边共用同一个账号，不需要重新注册。如果你还没设置过密码，在上方填好邮箱后点下面的按钮，再点击邮件里的链接就能设置密码。', 'Both apps share one account, so there is no need to sign up again. If you have never set a password, enter your email above, click the button below, then follow the link in the email.')),
+    setPw);
 
   const form = h('form', { class: 'auth-form', novalidate: true },
     h('label', { class: 'fld' }, h('span', { class: 'fld-label' }, T('邮箱', 'Email')), email),
     h('label', { class: 'fld' }, h('span', { class: 'fld-label' }, T('密码', 'Password')), pass),
     h('div', { class: 'row' }, signIn, signUp),
     h('div', { class: 'row small' }, magic, forgot),
-    msg);
+    msg,
+    note);
   form.addEventListener('submit', (e) => { e.preventDefault(); if (!need(true)) return; run(signIn, async () => {
     const { error } = await sb.auth.signInWithPassword({ email: email.value.trim(), password: pass.value });
     if (error) throw error;
@@ -40,6 +46,11 @@ export function renderAuth(root, { joining = false } = {}) {
     const { error } = await sb.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: baseUrl(), shouldCreateUser: true } });
     if (error) throw error;
     say(T('登录链接已发到你的邮箱。请用同一台设备打开。', 'A sign-in link is on its way. Open it on this device.'));
+  }); });
+  setPw.addEventListener('click', () => { if (!need(false)) return; run(setPw, async () => {
+    const { error } = await sb.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: baseUrl() });
+    if (error) throw error;
+    say(T('设置密码的邮件已发出。点击邮件里的链接回到这里，就会出现设置密码的窗口。', 'Email sent. Open the link in it to come back here and set your password.'));
   }); });
   forgot.addEventListener('click', () => { if (!need(false)) return; run(forgot, async () => {
     const { error } = await sb.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: baseUrl() });
@@ -61,13 +72,13 @@ export function renderAuth(root, { joining = false } = {}) {
 export function openRecovery() {
   const pass = h('input', { type: 'password', autocomplete: 'new-password', placeholder: T('至少 6 位', '6+ characters') });
   modal({
-    title: T('设置新密码', 'Set a new password'),
-    body: h('div', { class: 'form' }, h('div', { class: 'fld' }, h('span', { class: 'fld-label' }, T('新密码', 'New password')), pass)),
+    title: T('设置密码', 'Set your password'),
+    body: h('div', { class: 'form' }, h('div', { class: 'fld' }, h('span', { class: 'fld-label' }, T('密码', 'Password')), pass)),
     actions: [{ label: T('保存', 'Save'), kind: 'primary', onClick: async (close) => {
       if (pass.value.length < 6) { toast(T('密码至少 6 位', 'Password must be at least 6 characters')); return; }
       const { error } = await sb.auth.updateUser({ password: pass.value });
       if (error) throw error;
-      toast(T('密码已更新', 'Password updated')); close();
+      toast(T('密码已设置，以后可以用邮箱和密码登录', 'Password set. You can now sign in with email and password.'), 4000); close();
     } }],
   });
 }
